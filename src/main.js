@@ -32,6 +32,7 @@ function renderTodos(){
         todoListElement.appendChild(todoItem);
 
         const todoText = document.createElement("div");
+        todoText.id = `todo-text-${todo.id}`;
         todoText.classList.add("todo-text");
         if(todo.completed){
             todoText.classList.add("line-through");
@@ -86,6 +87,27 @@ function renderTodoNavBar(href){
             );
         }
     }
+}
+
+function handleClickOnTodoList(event){
+    let todo = null;
+    if(event.target.id !== null && event.target.id.inclues("todo-text")){
+        todo = event.target;
+    }
+
+    let todoIdNumber = -1;
+    if(todo){
+        const todoId = event.target.id.split("-").pop();
+        todoIdNumber = Number(todoId);
+    }
+
+    for(let i = 0; i < todos.length; i++){
+        if(todos[i].id === todoIdNumber){
+            todos[i].completed = !todos[i].completed;
+        }
+    }
+
+    renderTodos();
 }
 
 document.addEventListener("DOMContentLoaded", renderTodos);
