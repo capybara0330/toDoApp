@@ -10,7 +10,9 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.18",
+    "prettier": "3.8.1",
     "tailwindcss": "^4.1.18",
     "vite": "^7.3.1"
-  }
+  },
+  "prettier": "prettier --write \"src/**/*.js\" --config \".prettierrc.json\""
 }
