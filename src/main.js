@@ -24,27 +24,9 @@ function renderTodos(){
         }
     }
 
-    for(let i = 0; i < filteredTodos.length; i++){
-        const todo = filteredTodos[i];
-
-        const todoItem = document.createElement("div");
-        todoItem.classList.add("p-4", "todo-item");
-        todoListElement.appendChild(todoItem);
-
-        const todoText = document.createElement("div");
-        todoText.id = `todo-text-${todo.id}`;
-        todoText.classList.add("todo-text");
-        if(todo.completed){
-            todoText.classList.add("line-through");
-        }
-        todoText.textContent = todo.text;
-        todoItem.appendChild(todoText);
-
-        const todoEdit = document.createElement("input");
-        todoEdit.classList.add("hidden", "todo-edit");
-        todoEdit.value = todo.text;
-        todoItem.appendChild(todoEdit);
-    }
+    filteredTodos.forEach((todo) => {
+        todoListElement.appendChild(createTodoItem(todo));
+    });
 }
 
 function handleNewTodoKeyDown(event){
@@ -117,3 +99,38 @@ newTodoInput.addEventListener("keydown", handleNewTodoKeyDown);
 
 const todoNav = document.getElementById("todo-nav");
 todoNav.addEventListener("click", handleClickOnNavbar);
+
+const todoListElement = document.getElementById("todo-list");
+todoListElement.addEventListener("click", handleClickOnTodoList);
+
+////////////////////
+//helper functions//
+////////////////////
+
+//creates todo text element
+const createTodoText = (todo) => {
+    const todoText = document.createElement("div");
+    todoText.id = `todo-text-${todo.id}`;
+    todoText.classList.add(
+        "todo-text",
+        ...(todo.completed ? ["line-through"] : []),
+    );
+    todoText.innerText = todo.text;
+    return todoText;
+};
+
+//creates todo edit input element
+const createTodoEditInput = (todo) =>{
+    const todoEdit = document.createElement("input");
+    todoEdit.classList.add("hidden", "todo-edit");
+    todoEdit.value = todo.text;
+    return todoEdit;
+};
+
+//creates todo item
+const createTodoItem = (todo) => {
+    const todoItem = document.createElement("div");
+    todoItem.classList.add("p-4", "todo-item");
+    todoItem.append(createTodoText(todo), createTodoEditInput(todo));
+    return todoItem;
+}
