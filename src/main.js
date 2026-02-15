@@ -1,6 +1,6 @@
 import "./style.css";
 
-const todos=[
+let todos=[
     {id: 1, text: "Buy milk", completed: false},
     {id: 2, text: "Buy bread", completed: false},
     {id: 3, text: "Buy jam", completed: true},
@@ -8,32 +8,17 @@ const todos=[
 let nextTodoId = 4; //generates unique id
 let filter = "all";
 
-function renderTodos(){
-    const todoListElement = document.getElementById("todo-list");
-    todoListElement.innerHTML = ""; //set empty for clean slate
-
-    let filteredTodos = [];
-    for(let i = 0; i < todos.length; i++){
-        const todo = todos[i];
-        if(filter === "all"){
-            filteredTodos.push(todo);
-        }else if(filter === "completed" && todo.completed){
-            filteredTodos.push(todo);
-        }else if(filter === "active" && !todo.completed){
-            filteredTodos.push(todo);
-        }
-    }
-
-    filteredTodos.forEach((todo) => {
-        todoListElement.appendChild(createTodoItem(todo));
-    });
-}
+const renderTodos = () => {
+    todoListElement.replaceChildren(
+        ...filterTodos(todos, filter).map(createTodoItem),
+    );
+};
 
 function handleNewTodoKeyDown(event){
     const newTodoInput = event.target;
     const todoText = newTodoInput.value.trim();
     if(event.key === "Enter" && todoText !== ""){
-        todos.push({id: nextTodoId++, text: todoText, completed: false});
+        todos = addTodo(todos, todoText);
         newTodoInput.value = "";
         renderTodos();
     }
@@ -134,3 +119,20 @@ const createTodoItem = (todo) => {
     todoItem.append(createTodoText(todo), createTodoEditInput(todo));
     return todoItem;
 }
+
+//filters todos based on current filter setting
+const filterTodos = (todos, filter) =>{
+    if(filter === "active"){
+        return todos.filter((todo) => !todo.completed);
+    } else if (filter === "completed"){
+        return todos.filter((todo) => todo.completed);
+    }else{
+        return [...todos];
+    }
+}
+
+//creates a new array with the existing todos and a new todo item
+const addTodo = (todos, newTodoText) => [
+    ...todos,
+    {id: nextTodoId++, text: newTodoText, completed:false},
+];
