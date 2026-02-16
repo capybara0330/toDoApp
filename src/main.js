@@ -26,6 +26,14 @@ const createTodoApp = () => {
             filter = newFilter;
         },
         getTodos: () => filterTodos(),
+        markAllCompleted: () => {
+            todos = todos.map((todo) => ({...todo, completed: true}));
+        },
+        deleteCompleted: () => {
+            todos = todos.filter((todo) => !todo.completed); 
+        },
+        getNumberOfActiveTodos: () =>
+            todos.reduce((acc, todo) => acc + !todo.completed, 0),
     };
 };
 
@@ -34,16 +42,25 @@ const todoApp = createTodoApp();
 const todoListElement = document.getElementById("todo-list");
 const inputNewTodo = document.getElementById("new-todo");
 const todoNav = document.getElementById("todo-nav");
+const markAllCompleted = document.getElementById("mark-all-completed");
+const clearCompleted = document.getElementById("clear-completed");
+const activeTodosCount = document.getElementById("todo-count");
+
+
+///////////////////////////////////
+//todo rendering helper functions//
+///////////////////////////////////
+
 
 //creates todo text element
 const createTodoText = (todo) => {
     const todoText = document.createElement("div");
     todoText.id = `todo-text-${todo.id}`;
-    todoText.classList.add(
-        "todo-text",
-        ...(todo.completed ? ["line-through"] : []),
-    );
-    todoText.innerText = todo.text;
+    todoText.classList.add("todo-text");
+    todoText.textContent = todo.text;
+    if(todo.completed){
+        todoText.classList.add("line-through");
+    }
     return todoText;
 };
 
@@ -63,13 +80,25 @@ const createTodoItem = (todo) => {
     return todoItem;
 }
 
+////////////////////////
+//main todo render fxn//
+////////////////////////
+
 //render todos based on current filter
 const renderTodos = () => {
     todoListElement.innerHTML = "";
 
     const todoElements = todoApp.getTodos().map(createTodoItem);
     todoListElement.append(...todoElements);
+
+    activeTodosCount.textContent = `${todoApp.getNumberOfActiveTodos()} item${todoApp.getNumberOfActiveTodos() === 1 ? "" : "s"} left`;
 }
+
+
+
+/////////////////////////
+//navbar rendering fxns//
+/////////////////////////
 
 //updates class list of a navbar element
 const updateClassList = (element, isActive) => {
@@ -94,6 +123,12 @@ const renderTodoNavBar = (href) => {
     });
 };
 
+
+
+//////////////////
+//event handlers//
+//////////////////
+
 //event handler to create new todo item
 const handleKeyDownToCreateNewTodo = (event) => {
     const todoText = event.target.value.trim();
@@ -106,7 +141,7 @@ const handleKeyDownToCreateNewTodo = (event) => {
 
 //event handler to toggle completed status of a todo item
 const handleClickOnTodoList = (event) => {
-    if(event.target.id.inclues("todo-text")){
+    if(event.target.id.includes("todo-text")){
         const todoId = event.target.id.split("-").pop();
         todoApp.toggleTodo(Number(todoId));
         renderTodos();
@@ -115,15 +150,33 @@ const handleClickOnTodoList = (event) => {
 
 //filters todos based on the navbar selection
 const handleClickOnNavbar = (event) => {
-    if(event.target.tagName === "A"){
+    if(event.target.tagName === "A"){ //if click on a link
         const href = event.target.href;
-        filter = href.split("/").pop() || "all";
+        todoApp.setFilter(href.split("/").pop() || "all");
         renderTodos();
         renderTodoNavBar(href);
     }
 };
 
+//marks all todos as completed
+const handleMarkAllCompleted = () => {
+    todoApp.markAllCompleted();
+    renderTodos();
+};
+
+//clears all completed todos
+const clearCompletedTodos = () => {
+    todoApp.deleteCompleted();
+    renderTodos();
+};
+
+////////////////////////
+//event listener calls//
+////////////////////////
+
 todoListElement.addEventListener("click", handleClickOnTodoList);
 inputNewTodo.addEventListener("keydown", handleKeyDownToCreateNewTodo);
 todoNav.addEventListener("click", handleClickOnNavbar);
 document.addEventListener("DOMContentLoaded", renderTodos);
+markAllCompleted.addEventListener("click", handleMarkAllCompleted);
+clearCompleted.addEventListener("click", clearCompletedTodos);
