@@ -1,9 +1,10 @@
 class Todo{
+    static #nextId = 1;
     #id;
     #text;
     #completed;
 
-    constructor(id, text, completed = false){
+    constructor(text, completed = false){
         this.#id = id;
         this.text = text;
         this.completed = completed;
@@ -34,16 +35,4 @@ class Todo{
     }
 }
 
-const todo = new Todo(1, "Buy milk");
-console.log(todo);
-console.log(todo.id);
-console.log(todo.text);
-console.log(todo.completed);
-
-todo.text = "Buy eggs";
-todo.completed = true;
-
-console.log(todo);
-console.log(todo.id);
-console.log(todo.text);
-console.log(todo.completed);
+export default Todo;
