@@ -1,83 +1,39 @@
 import "./style.css";
 
-let todos=[
-    {id: 1, text: "Buy milk", completed: false},
-    {id: 2, text: "Buy bread", completed: false},
-    {id: 3, text: "Buy jam", completed: true},
-];
-let nextTodoId = 4; //generates unique id
-let filter = "all";
+const createTodoApp = () => {
+    let todos = [];
+    let nextTodoId = 1;
+    let filter = "all";
 
-const renderTodos = () => {
-    todoListElement.replaceChildren(
-        ...filterTodos(todos, filter).map(createTodoItem),
-    );
+    const filterTodos = () => {
+        if(filter === "active"){
+            return todos.filter((todo) => !todo.completed);
+        }else if(filter === "completed"){
+            return todos.filter((todo) => todo.completed);
+        }else{
+            return [...todos];
+        }
+    };
+
+    return{
+        addTodo: (newTodoText) => {
+            todos = [...todos, {id: nextTodoId++, text: newTodoText, completed: false}];
+        },
+        toggleTodo: (todoId) => {
+            todos = todos.map((todo) => todo.id === todoId ? {...todo, completed: !todo.completed} : todo,);
+        },
+        setFilter: (newFilter) => {
+            filter = newFilter;
+        },
+        getTodos: () => filterTodos(),
+    };
 };
 
-function handleNewTodoKeyDown(event){
-    const newTodoInput = event.target;
-    const todoText = newTodoInput.value.trim();
-    if(event.key === "Enter" && todoText !== ""){
-        todos = addTodo(todos, todoText);
-        newTodoInput.value = "";
-        renderTodos();
-    }
-}
-
-function handleClickOnNavbar(event){
-    if(event.target.tagName === "A"){
-        const hrefValue = event.target.href;
-        const action = hrefValue.split("/").pop();
-        filter = action === "" ? "all" : action;
-        renderTodos();
-        renderTodoNavBar(hrefValue);
-    }
-}
-
-function renderTodoNavBar(href){
-    const elements = todoNav.children;
-    for(let i = 0; i < elements.length; i++){
-        const element = elements[i];
-        if(element.href === href){
-            element.classList.add(
-                "underline",
-                "underline-offset-4",
-                "decoration-rose-800",
-                "decoration-2",
-            );
-        }else{
-            element.classList.remove(
-                "underline",
-                "underline-offset-4",
-                "decoration-rose-800",
-                "decoration-2",
-            );
-        }
-    }
-}
-
-const handleClickOnTodoList = (event) => {
-    if(event.target.id.includes("todo-text")){
-        const todoId = event.target.id.split("-").pop();
-        todos = toggleTodo(todos, Number(todoId));
-        renderTodos();
-    }
-}
-
-document.addEventListener("DOMContentLoaded", renderTodos);
-
-const newTodoInput = document.getElementById("new-todo");
-newTodoInput.addEventListener("keydown", handleNewTodoKeyDown);
-
-const todoNav = document.getElementById("todo-nav");
-todoNav.addEventListener("click", handleClickOnNavbar);
+const todoApp = createTodoApp();
 
 const todoListElement = document.getElementById("todo-list");
-todoListElement.addEventListener("click", handleClickOnTodoList);
-
-////////////////////
-//helper functions//
-////////////////////
+const inputNewTodo = document.getElementById("new-todo");
+const todoNav = document.getElementById("todo-nav");
 
 //creates todo text element
 const createTodoText = (todo) => {
@@ -107,25 +63,13 @@ const createTodoItem = (todo) => {
     return todoItem;
 }
 
-//filters todos based on current filter setting
-const filterTodos = (todos, filter) =>{
-    if(filter === "active"){
-        return todos.filter((todo) => !todo.completed);
-    } else if (filter === "completed"){
-        return todos.filter((todo) => todo.completed);
-    }else{
-        return [...todos];
-    }
+//render todos based on current filter
+const renderTodos = () => {
+    todoListElement.innerHTML = "";
+
+    const todoElements = todoApp.getTodos().map(createTodoItem);
+    todoListElement.append(...todoElements);
 }
-
-//creates a new array with the existing todos and a new todo item
-const addTodo = (todos, newTodoText) => [
-    ...todos,
-    {id: nextTodoId++, text: newTodoText, completed:false},
-];
-
-//toggles the completed status of a todo item
-const toggleTodo = (todos, todoId) => todos.map((todo) => todo.id === todoId ? {...todo, completed: !todo.completed} : todo,);
 
 //updates class list of a navbar element
 const updateClassList = (element, isActive) => {
@@ -150,6 +94,25 @@ const renderTodoNavBar = (href) => {
     });
 };
 
+//event handler to create new todo item
+const handleKeyDownToCreateNewTodo = (event) => {
+    const todoText = event.target.value.trim();
+    if(event.key === "Enter" && todoText !== ""){
+        todoApp.addTodo(todoText);
+        event.target.value = "";
+        renderTodos();
+    }
+};
+
+//event handler to toggle completed status of a todo item
+const handleClickOnTodoList = (event) => {
+    if(event.target.id.inclues("todo-text")){
+        const todoId = event.target.id.split("-").pop();
+        todoApp.toggleTodo(Number(todoId));
+        renderTodos();
+    }
+}
+
 //filters todos based on the navbar selection
 const handleClickOnNavbar = (event) => {
     if(event.target.tagName === "A"){
@@ -159,3 +122,8 @@ const handleClickOnNavbar = (event) => {
         renderTodoNavBar(href);
     }
 };
+
+todoListElement.addEventListener("click", handleClickOnTodoList);
+inputNewTodo.addEventListener("keydown", handleKeyDownToCreateNewTodo);
+todoNav.addEventListener("click", handleClickOnNavbar);
+document.addEventListener("DOMContentLoaded", renderTodos);
