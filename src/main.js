@@ -56,25 +56,12 @@ function renderTodoNavBar(href){
     }
 }
 
-function handleClickOnTodoList(event){
-    let todo = null;
-    if(event.target.id !== null && event.target.id.inclues("todo-text")){
-        todo = event.target;
-    }
-
-    let todoIdNumber = -1;
-    if(todo){
+const handleClickOnTodoList = (event) => {
+    if(event.target.id.includes("todo-text")){
         const todoId = event.target.id.split("-").pop();
-        todoIdNumber = Number(todoId);
+        todos = toggleTodo(todos, Number(todoId));
+        renderTodos();
     }
-
-    for(let i = 0; i < todos.length; i++){
-        if(todos[i].id === todoIdNumber){
-            todos[i].completed = !todos[i].completed;
-        }
-    }
-
-    renderTodos();
 }
 
 document.addEventListener("DOMContentLoaded", renderTodos);
@@ -136,3 +123,39 @@ const addTodo = (todos, newTodoText) => [
     ...todos,
     {id: nextTodoId++, text: newTodoText, completed:false},
 ];
+
+//toggles the completed status of a todo item
+const toggleTodo = (todos, todoId) => todos.map((todo) => todo.id === todoId ? {...todo, completed: !todo.completed} : todo,);
+
+//updates class list of a navbar element
+const updateClassList = (element, isActive) => {
+    const classes = [
+        "underline",
+        "underline-offset-4",
+        "decoration-rose-800",
+        "decoration-2",
+    ];
+
+    if(isActive) {
+        element.classList.add(...classes);
+    }else{
+        element.classList.remove(...classes);
+    }
+};
+
+//renders navbar anchor elements
+const renderTodoNavBar = (href) => {
+    Array.from(todoNav.children).forEach((element) => {
+        updateClassList(element, element.href === href);
+    });
+};
+
+//filters todos based on the navbar selection
+const handleClickOnNavbar = (event) => {
+    if(event.target.tagName === "A"){
+        const href = event.target.href;
+        filter = href.split("/").pop() || "all";
+        renderTodos();
+        renderTodoNavBar(href);
+    }
+};
